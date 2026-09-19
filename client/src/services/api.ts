@@ -1,6 +1,6 @@
 import { CropCondition, ScanResult, FarmerReview, CropAlert, WeatherRiskData } from '../types';
 
-const API_BASE = '/api';
+const API_BASE = 'https://cropshield-gqtm.onrender.com/api';
 
 export const api = {
   async getDiseases(): Promise<CropCondition[]> {
