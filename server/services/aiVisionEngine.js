@@ -217,12 +217,27 @@ Return ONLY valid JSON matching this exact schema:
       parsed = JSON.parse(response.text);
       successfulModel = candidateModel;
       break; // Succeeded!
-    } catch (modelErr) {
-      console.warn(`[CropShield Backend] Model ${candidateModel} failed: ${modelErr.message}`);
-      lastError = modelErr;
-      // If 404 or unsupported, continue to next candidate model
-      continue;
-    }
+   } catch (modelErr) {
+  console.error(`[CropShield Backend] ❌ Gemini model failed: ${candidateModel}`);
+  console.error('[CropShield Backend] Error name:', modelErr?.name);
+  console.error('[CropShield Backend] Error message:', modelErr?.message);
+  console.error('[CropShield Backend] Error status:', modelErr?.status);
+  console.error('[CropShield Backend] Full error:', modelErr);
+
+  lastError = modelErr;
+
+  // Only try another model for model-not-found errors.
+  // Do NOT hide authentication, permission, method, quota, or server errors.
+  const status = Number(modelErr?.status);
+
+  if (status === 404) {
+    console.warn(`[CropShield Backend] Model ${candidateModel} not available. Trying next model...`);
+    continue;
+  }
+
+  // Stop immediately for other errors such as 400, 401, 403, 405, 429, 500, etc.
+  break;
+}
   }
 
   if (!parsed || !successfulModel) {
